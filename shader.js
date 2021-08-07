@@ -18,6 +18,10 @@ const frag = glsl(/* glsl */ `
   // vec2 means it has an x and y coordinate
   varying vec2 vUv; // This variable comes from webgl, gives us uv coordinates of surface we're drawing on
 
+// This require works because of glslify
+  #pragma glslify: noise = require('glsl-noise/simplex/3d');
+  #pragma glslify: hsl2rgb = require('glsl-hsl2rgb');
+
   void main () { // Every shader has to have main function, here the pixel manipulation is done
   // fragColor is a reserverd word in this shader language
   // Vec4 syntax: r, g, b, alpha
@@ -26,24 +30,42 @@ const frag = glsl(/* glsl */ `
   // vec with 1 value fills all 3 params with that value
   // vec3 color = vec3(sin(time) + 1.0 * vUv.x); // Time is in seconds, sin(time) is between -1 and 1
 
-  vec3 colorA = sin(time) + vec3(0.8, 0.4, 0.0) + 0.4;
-  vec3 colorB = vec3(0.0, 0.2, 0.8);
-    // Using vec3 in vec4 creates a gradient
+// CODE FOR CIRCLE
 
-    // Find center of screen
+//   vec3 colorA = sin(time) + vec3(0.8, 0.4, 0.0) + 0.4;
+//   vec3 colorB = vec3(0.0, 0.2, 0.8);
+//     // Using vec3 in vec4 creates a gradient
+
+//     // Find center of screen
     vec2 center = vUv - 0.5; // subtracts 0.5 from u and v coordinate
     center.x *= aspectRatio; // Shrink center by aspect ratio
-    // Length: magnitude of the vector
-    float distanceFromCenter = length(center);
+//     // Length: magnitude of the vector
+     float distanceFromCenter = length(center);
 
-// Step function: if first arg is less than second arg return 0, else return 1. Basically like ternary operator.
-// Smoothstep: pass low value, then high value, then the value that you have, which should lie between low and high value.
-// If input value is between low and high value, it returns a value between 0 and 1
-    float alpha = smoothstep(0.355, 0.350, distanceFromCenter); 
+// // Step function: if first arg is less than second arg return 0, else return 1. Basically like ternary operator.
+// // Smoothstep: pass low value, then high value, then the value that you have, which should lie between low and high value.
+// // If input value is between low and high value, it returns a value between 0 and 1
+     float alpha = smoothstep(0.375, 0.350, distanceFromCenter); 
 
-  // Mix is a glsl function, you can specify the colors you want to mix between. Its like lerp, with min max and value between 0-1 that gives value in between
-    vec3 color = mix(colorA, colorB, vUv.x + vUv.y * sin(time));
-    gl_FragColor = vec4(color, alpha); // Use alpha to create circle
+//   // Mix is a glsl function, you can specify the colors you want to mix between. Its like lerp, with min max and value between 0-1 that gives value in between
+//     vec3 color = mix(colorA, colorB, vUv.x + vUv.y * sin(time));
+//     gl_FragColor = vec4(color, alpha); // Use alpha to create circle
+
+// CODE FOR NOISE
+
+//     // Find center of screen
+ //   vec2 center = vUv - 0.5; // subtracts 0.5 from u and v coordinate
+ //   center.x *= aspectRatio; // Shrink center by aspect ratio
+
+    // coordinate * 2 increases noise frequency (so smaller blobs)
+    float n = noise(vec3(center * 1.0, time / 4.0)); // noise requires an x y z coordinate
+
+    vec3 color = hsl2rgb(
+      0.6 + n * 0.05, // First number sets base color. Making last number smaller results in fewer color variation
+      0.7,
+      0.5 + n  * 0.5);
+
+    gl_FragColor = vec4(vec3(color), alpha);
   }
 `);
 
@@ -52,7 +74,7 @@ const sketch = ({ gl }) => {
   // Create the shader and return it
   return createShader({
     // Sets the background color. Transparent works as well, by setting to false
-    clearColor: "white",
+    clearColor: "hsl(40, 100%, 80%)",
     // Pass along WebGL context
     gl,
     // Specify fragment and/or vertex shader strings
