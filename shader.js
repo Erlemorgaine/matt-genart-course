@@ -6,6 +6,8 @@ const glsl = require("glslify"); // Tool to write shader, since it's not Javascr
 const settings = {
   context: "webgl", // This specifies that its 3d
   animate: true,
+  dimensions: [2048, 2048],
+  pixelsPerInch: 300,
 };
 
 // Your glsl code. Glsl function is necessary to bring in modules later on
@@ -45,7 +47,7 @@ const frag = glsl(/* glsl */ `
 // // Step function: if first arg is less than second arg return 0, else return 1. Basically like ternary operator.
 // // Smoothstep: pass low value, then high value, then the value that you have, which should lie between low and high value.
 // // If input value is between low and high value, it returns a value between 0 and 1
-     float alpha = smoothstep(0.375, 0.350, distanceFromCenter); 
+     float alpha = smoothstep(0.315, 0.300, distanceFromCenter); 
 
 //   // Mix is a glsl function, you can specify the colors you want to mix between. Its like lerp, with min max and value between 0-1 that gives value in between
 //     vec3 color = mix(colorA, colorB, vUv.x + vUv.y * sin(time));
@@ -61,8 +63,8 @@ const frag = glsl(/* glsl */ `
     float n = noise(vec3(center * 1.0, time / 4.0)); // noise requires an x y z coordinate
 
     vec3 color = hsl2rgb(
-      0.6 + n * 0.05, // First number sets base color. Making last number smaller results in fewer color variation
-      0.7,
+      0.35 + n * 0.05, // First number sets base color. Making last number smaller results in fewer color variation
+      0.4,
       0.5 + n  * 0.5);
 
     gl_FragColor = vec4(vec3(color), alpha);
@@ -74,7 +76,7 @@ const sketch = ({ gl }) => {
   // Create the shader and return it
   return createShader({
     // Sets the background color. Transparent works as well, by setting to false
-    clearColor: "hsl(40, 100%, 80%)",
+    clearColor: "hsl(150, 100%, 15%)",
     // Pass along WebGL context
     gl,
     // Specify fragment and/or vertex shader strings
