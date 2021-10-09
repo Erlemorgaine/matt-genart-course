@@ -9,7 +9,7 @@ const settings = {
 const sketch = () => {
   const createGrid = () => {
     const points = [];
-    const count = 7;
+    const count = 6;
 
     for (let x = 0; x < count; x++) {
       for (let y = 0; y < count; y++) {
@@ -25,7 +25,7 @@ const sketch = () => {
                     random.value() * 100
                   }%, ${Math.abs(random.noise2D(u, v))})`,
                 ]),
-          radius: Math.abs(random.gaussian()) * 0.01,
+          radius: Math.abs(random.gaussian()) * 0.005,
           rotation: random.noise2D(u, v),
           position: [u, v],
           fillSymbol: ["︑"][0],

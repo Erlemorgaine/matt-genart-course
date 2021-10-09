@@ -2,9 +2,16 @@
   "name": "matt-genart-course",
   "version": "1.0.0",
   "description": "",
-  "main": "test-sketch.js",
+  "main": "main.js",
+  "build": {
+    "appId": "",
+    "mac": {
+      "category": ""
+    }
+  },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "pack": "electron-builder --dir",
+    "dist": "electron-builder --win"
   },
   "keywords": [],
   "author": "",
@@ -16,5 +23,9 @@
     "glsl-noise": "^0.0.0",
     "nice-color-palettes": "^3.0.0",
     "three": "^0.133.0"
+  },
+  "devDependencies": {
+"electron": "^15.1.0",
+    "electron-builder": "^22.11.7"
   }
 }

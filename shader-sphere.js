@@ -42,37 +42,50 @@ const sketch = ({ context }) => {
 
   // Setup a geometry
   // COmmented line is for cubes
-  const geometry = new THREE.BoxGeometry(1, 1, 1);
+  //const geometry = new THREE.BoxGeometry(1, 1, 1);
+  const geometry = new THREE.SphereGeometry(1, 32, 32);
 
   const meshes = [];
 
-  const fragmentShader = `
+  const fragmentShader = glslify(`
   varying vec2 vUv;
 
    uniform vec3 color;
+   uniform float playhead;
+   uniform float time;
+
+   #pragma glslify: noise = require('glsl-noise/simplex/3d');
 
     void main () {
-      gl_FragColor = vec4(vec3(color * (vUv.x + 0.5)), 1.0);
-    }
-  `;
+      float offset = 1.0 * noise(vec3(vUv.xy * 4.0, time / 2.0));
 
+      gl_FragColor = vec4(vec3(color * vUv.x + offset), 1.0);
+    }
+  `);
+
+  // DOing pos.xyz in vec4 times something > 1.0 makes it more spiky
   const vertexShader = glslify(`
   varying vec2 vUv;
 
-  uniform float time;
+  uniform float playhead;
 
   #pragma glslify: noise = require('glsl-noise/simplex/4d');
 
     void main () {
       vUv = uv;
       vec3 pos = position.xyz;
-      pos += normal * noise(vec4(position.xyz, time));
+
+      // * 0.1 makes outer surface more round we scaled down the noice values
+      // We can duplicate this with different valuesto make more interesting textures
+      pos += 0.1 * normal * noise(vec4(pos.xyz * 4.0, playhead));
+      pos += 0.5 * normal * noise(vec4(pos.xyz * 10.0, playhead));
+
       gl_Position = projectionMatrix * modelViewMatrix * vec4(pos, 1.0);
     }
   `);
 
   // Setup multiple meshes with geometry + material
-  for (let i = 0; i < 40; i++) {
+  for (let i = 0; i < 1; i++) {
     // Setup a material.
     // - When you do BasicMaterial, it will work without lighting in the scene
     // - MeshPhysicalMaterial adds lighting
@@ -83,6 +96,7 @@ const sketch = ({ context }) => {
       vertexShader,
       uniforms: {
         time: { value: 0 },
+        playhead: { value: 0 },
         color: {
           value: new THREE.Color(`hsl(${Math.random() * 360}, 100%, 50%)`), // If i want to remove shader and return to normal, simply place color in 'color' property above roughness
         },
@@ -93,15 +107,6 @@ const sketch = ({ context }) => {
 
     const mesh = new THREE.Mesh(geometry, material);
 
-    mesh.position.set(
-      Math.random() * 2 - 1,
-      Math.random() - 1,
-      Math.random() - 1
-    );
-
-    // TO MANIPULATE SCALES of xyz, add mesh.scale.set (like mesh)
-
-    mesh.scale.multiplyScalar(Math.random() * 0.2); // will multiply x, y, z by same number value
     scene.add(mesh);
     meshes.push(mesh);
   }
@@ -127,7 +132,7 @@ const sketch = ({ context }) => {
       const aspect = viewportWidth / viewportHeight;
 
       // Ortho zoom
-      const zoom = 1.0;
+      const zoom = 2.0;
 
       // Bounds
       camera.left = -zoom * aspect;
@@ -147,11 +152,14 @@ const sketch = ({ context }) => {
       camera.updateProjectionMatrix();
     },
     // Update & render your scene here
-    render({ time }) {
+    render({ playhead, time }) {
       // controls.update();
       scene.rotation.y = Math.sin(time) + 0.75;
 
-      meshes.forEach((mesh) => (mesh.material.uniforms.time.value = time));
+      meshes.forEach((mesh) => {
+        mesh.material.uniforms.time.value = time;
+        mesh.material.uniforms.playhead.value = playhead;
+      });
 
       renderer.render(scene, camera);
     },
