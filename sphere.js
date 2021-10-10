@@ -47,12 +47,15 @@ const frag = glsl(/* glsl */ `
 // // Step function: if first arg is less than second arg return 0, else return 1. Basically like ternary operator.
 // // Smoothstep: pass low value, then high value, then the value that you have, which should lie between low and high value.
 // // If input value is between low and high value, it returns a value between 0 and 1
-     float alpha = smoothstep(0.315, 0.300, distanceFromCenter); 
+     
+     // ORIGINAL VALUE
+     //float alpha = smoothstep(0.315, 0.300, distanceFromCenter); 
+     float alpha = step(distanceFromCenter, 0.3); 
 
-     // This also has an interesting effect
+     // This WITH ORIGINAL VALUE for alpha also has an interesting effect
      //float alpha2 = smoothstep(0.315, 0.300, 0.0 - distanceFromCenter); 
 
-     float alpha2 = step(0.315, distanceFromCenter); 
+     float alpha2 = step(0.300, distanceFromCenter); 
 
 //   // Mix is a glsl function, you can specify the colors you want to mix between. Its like lerp, with min max and value between 0-1 that gives value in between
 //     vec3 color = mix(colorA, colorB, vUv.x + vUv.y * sin(time));
@@ -76,7 +79,7 @@ const frag = glsl(/* glsl */ `
               0.0);
       } else {
         color1 = hsl2rgb(
-          0.55 + n * 0.3, // First number sets base color. Making last number smaller results in fewer color variation
+          0.55 + n * 0.1, // First number sets base color. Making last number smaller results in fewer color variation
           0.4,
           0.5 + n  * 0.5);
       }
@@ -90,7 +93,7 @@ vec3 color2;
               0.0);
       } else {
     color2 = hsl2rgb(
-      0.1 + n * 0.3, // First number sets base color. Making last number smaller results in fewer color variation
+      0.1 + n * 0.1, // First number sets base color. Making last number smaller results in fewer color variation
       0.4,
       0.5 + n * 0.3);
       }
