@@ -11,7 +11,7 @@
   },
   "scripts": {
     "pack": "electron-builder --dir",
-    "dist": "electron-builder --win"
+    "dist-shader": "canvas-sketch shader-sphere.js --name index --build --inline && electron-builder --win"
   },
   "keywords": [],
   "author": "",

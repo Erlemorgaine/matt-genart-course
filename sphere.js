@@ -49,6 +49,11 @@ const frag = glsl(/* glsl */ `
 // // If input value is between low and high value, it returns a value between 0 and 1
      float alpha = smoothstep(0.315, 0.300, distanceFromCenter); 
 
+     // This also has an interesting effect
+     //float alpha2 = smoothstep(0.315, 0.300, 0.0 - distanceFromCenter); 
+
+     float alpha2 = step(0.315, distanceFromCenter); 
+
 //   // Mix is a glsl function, you can specify the colors you want to mix between. Its like lerp, with min max and value between 0-1 that gives value in between
 //     vec3 color = mix(colorA, colorB, vUv.x + vUv.y * sin(time));
 //     gl_FragColor = vec4(color, alpha); // Use alpha to create circle
@@ -62,12 +67,38 @@ const frag = glsl(/* glsl */ `
     // coordinate * 2 increases noise frequency (so smaller blobs)
     float n = noise(vec3(center * 1.0, time / 4.0)); // noise requires an x y z coordinate
 
-    vec3 color = hsl2rgb(
-      0.35 + n * 0.05, // First number sets base color. Making last number smaller results in fewer color variation
-      0.4,
-      0.5 + n  * 0.5);
+    vec3 color1;
 
-    gl_FragColor = vec4(vec3(color), alpha);
+      if (alpha == 0.0) {
+        color1 = hsl2rgb(
+              0.0, // First number sets base color. Making last number smaller results in fewer color variation
+              0.0,
+              0.0);
+      } else {
+        color1 = hsl2rgb(
+          0.55 + n * 0.3, // First number sets base color. Making last number smaller results in fewer color variation
+          0.4,
+          0.5 + n  * 0.5);
+      }
+
+vec3 color2;
+
+      if (alpha2 == 0.0) {
+    color2 = hsl2rgb(
+      0.0, // First number sets base color. Making last number smaller results in fewer color variation
+              0.0,
+              0.0);
+      } else {
+    color2 = hsl2rgb(
+      0.1 + n * 0.3, // First number sets base color. Making last number smaller results in fewer color variation
+      0.4,
+      0.5 + n * 0.3);
+      }
+
+      
+
+//gl_FragColor = vec4(vec3(color), 1);
+     gl_FragColor = vec4(vec3(color1), alpha) + vec4(vec3(color2), alpha2);
   }
 `);
 
@@ -76,7 +107,7 @@ const sketch = ({ gl }) => {
   // Create the shader and return it
   return createShader({
     // Sets the background color. Transparent works as well, by setting to false
-    clearColor: "hsl(150, 100%, 15%)",
+    clearColor:  false, //"hsl(25, 100%, 50%)",
     // Pass along WebGL context
     gl,
     // Specify fragment and/or vertex shader strings

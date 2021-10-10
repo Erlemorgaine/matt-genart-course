@@ -11,7 +11,7 @@ app.on("ready", () => {
   });
 
   mainWindow.setTitle("Rock_shader");
-  mainWindow.loadFile("shader-sphere.js");
+  mainWindow.loadFile("index.html");
 
   mainWindow.on("closed", () => {
     mainWindow = null;
