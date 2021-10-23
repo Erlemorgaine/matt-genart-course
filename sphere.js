@@ -93,7 +93,7 @@ vec3 color2;
               0.0);
       } else {
     color2 = hsl2rgb(
-      0.1 + n * 0.1, // First number sets base color. Making last number smaller results in fewer color variation
+      0.1 + n * 0.5, // First number sets base color. Making last number smaller results in fewer color variation
       0.4,
       0.5 + n * 0.3);
       }

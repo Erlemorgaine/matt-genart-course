@@ -45,7 +45,7 @@ const sketch = ({ context }) => {
   const geometry = new THREE.SphereGeometry(1, 44, 88);
 
   const textureLoader = new THREE.TextureLoader();
-  const splashPaintTexture = textureLoader.load("world-drop.jpg");
+  const splashPaintTexture = textureLoader.load("world-paint.jpg");
 
   // Setup a material
   const material = new THREE.MeshStandardMaterial({
