@@ -5,6 +5,7 @@ global.THREE = require("three");
 require("three/examples/js/controls/OrbitControls");
 
 const canvasSketch = require("canvas-sketch");
+const glsl = require('glslify');
 
 const settings = {
   // Make the loop animated
@@ -35,7 +36,37 @@ const sketch = ({ context }) => {
   const scene = new THREE.Scene();
 
   // Setup a geometry
-  const geometry = new THREE.SphereGeometry(1, 64, 32);
+  const geometry = new THREE.SphereGeometry(1, 32, 16);
+
+  const baseIcoGeom = new THREE.IcosahedronGeometry(1, 1); // Params: radius, detail. Detail shouldnt be too high poly
+  // This is different from the tutorial, which uses the deprecated baseIcoGeom.vertices
+  let points = baseIcoGeom.attributes.position.array;
+
+  points = points.reduce((prevVertex, netPoint, index) => {
+    const verticesLastIndex = prevVertex.length - 1;
+
+    if (index % 3 === 0) {
+      const vertex = new THREE.Vector3(netPoint);
+      prevVertex.push(vertex)
+    } else if (index % 3 === 1) {
+      prevVertex[verticesLastIndex].y = netPoint;
+    } else {
+      prevVertex[verticesLastIndex].z = netPoint;
+    }
+    return prevVertex;
+  }, [])
+
+  points.forEach((point) => {
+    const pointMesh = new THREE.Mesh(geometry, 
+      new THREE.MeshBasicMaterial({
+        color: 'green',
+        wireframe: true
+      }));
+
+      pointMesh.position.copy(point);
+      pointMesh.scale.setScalar(0.15);
+      scene.add(pointMesh);
+  });
 
   const vertexShader = /* glsl */`
     varying vec2 vUv;
@@ -45,30 +76,50 @@ const sketch = ({ context }) => {
     }
   `;
 
-  const fragmentShader = /* glsl */`
+  const fragmentShader = glsl(/* glsl */`
+    #pragma glslify: noise = require('glsl-noise/simplex/3d');
+
     varying vec2 vUv;
     uniform float time;
     uniform vec3 color;
 
     void main () {
-      vec2 center = vec2(0.5, 0.5);
-      vec2 scaledPositions = vUv;
-      scaledPositions.x *= 2.0;
-      vec2 pos = mod(scaledPositions * 8.0, 1.0); // mod = modulo, but it makes sure it's alwyas a value between 0 and 1
+      // THIS IS ALL SPHERE CODE
 
-      float dist = distance(pos, center); // distance is built in function of glsl, gives Euclidean distance between 2 coordinates
+      // vec2 center = vec2(0.5, 0.5);
+      // vec2 scaledPositions = vUv;
+      // scaledPositions.x *= 2.0;
+      // vec2 pos = mod(scaledPositions * 8.0, 1.0); // mod = modulo, but it makes sure it's alwyas a value between 0 and 1
+
+      // float dist = distance(pos, center); // distance is built in function of glsl, gives Euclidean distance between 2 coordinates
       
-      // This gives a cool animation effect
-      // float mask = step(0.4 * sin(time * 1.5 + vUv.x * 5.0) + 0.15 * sin(time * 3.5 + vUv.y * 7.0), dist);
-      // gl_FragColor = vec4(mask, 0.5 * sin(time) * vUv.y + 0.3, 0.6 * sin(time) * vUv.x + 0.6, 1.0); 
+      // // This gives a cool animation effect
+      // // float mask = step(0.4 * sin(time * 1.5 + vUv.x * 5.0) + 0.15 * sin(time * 3.5 + vUv.y * 7.0), dist);
+      // // gl_FragColor = vec4(mask, 0.5 * sin(time) * vUv.y + 0.3, 0.6 * sin(time) * vUv.x + 0.6, 1.0); 
 
-      float mask = step(0.25 + sin(time + vUv.x * 5.0) * 0.25, dist);
-      mask = 1.0 - mask;
-      vec3 fragColor = mix(color, vec3(0.1, 0.8, 1.0), mask); //BUilt in function that takes two colors and switches between the colors using the mask
+      // // This also makes a nice, more simple animation
+      // //float mask = step(0.25 + sin(time + vUv.x * 5.0) * 0.25, dist);
+      
+      // // We use the same multiplication here as we used in our modulo (in pos variable)
+      // // We floor to revert weird shapes back to circles.
+      // // This is becausefloor makes sure to act only on the center point of the circe, instead of on every single pixel of the circle region
+      // vec2 noiseInput = floor(scaledPositions * 8.0); 
 
-      gl_FragColor = vec4(vec3(fragColor), 1.0); 
+      // // Use vUv and multiply by other float within vec3 to get crazy effects (optionally change the last multiplification float)
+      // // We multiply by a small value, since sometimes the offset can be so large that there will be a clipping effect (you'll see squares)
+      // float offset = noise(vec3(noiseInput.xy * 1.0, time * 0.5)) * 0.3;
+      // float mask = step(0.25 + offset, dist);
+
+      // mask = 1.0 - mask;
+      // vec3 fragColor = mix(color, vec3(0.1, 0.8, 1.0), mask); //BUilt in function that takes two colors and switches between the colors using the mask
+
+      // gl_FragColor = vec4(vec3(fragColor), 1.0); 
+
+
+      //  THIS IS ICOSAHEDRON CODE
+      gl_FragColor = vec4(vec3(color), 1.0); 
     }
-  `;
+  `);
 
   // Setup a material
   const material = new THREE.ShaderMaterial({
