@@ -6,9 +6,8 @@ const glsl = require("glslify"); // Tool to write shader, since it's not Javascr
 const settings = {
   context: "webgl", // This specifies that its 3d
   animate: true,
-  dimensions: [32, 27],
+  dimensions: [2048, 2048],
   pixelsPerInch: 300,
-  unit: 'cm'
 };
 
 // Your glsl code. Glsl function is necessary to bring in modules later on
