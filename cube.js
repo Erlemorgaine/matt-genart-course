@@ -15,6 +15,7 @@ const settings = {
   animate: true,
   // Get a WebGL canvas rather than 2D
   context: "webgl",
+  pixelsPerInch: 300,
   attributes: { antialias: true },
 };
 
@@ -84,7 +85,7 @@ const sketch = ({ context }) => {
       uniforms: {
         time: { value: 0 },
         color: {
-          value: new THREE.Color(`hsl(${Math.random() * 360}, 100%, 50%)`), // If i want to remove shader and return to normal, simply place color in 'color' property above roughness
+          value: new THREE.Color(`hsl(${180 + Math.random() * 200}, 100%, ${(Math.random() * 50 + 20).toFixed(0)}%)`), // If i want to remove shader and return to normal, simply place color in 'color' property above roughness
         },
       },
       roughness: 0.75,
