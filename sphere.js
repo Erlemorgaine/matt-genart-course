@@ -68,7 +68,7 @@ const frag = glsl(/* glsl */ `
  //   center.x *= aspectRatio; // Shrink center by aspect ratio
 
     // coordinate * 2 increases noise frequency (so smaller blobs)
-    float n = noise(vec3(center * 1.0, time / 4.0)); // noise requires an x y z coordinate
+    float n = noise(vec3(center.x * 15.0, center.y * 40.0, time / 2.0)); // noise requires an x y z coordinate
 
     vec3 color1;
 
@@ -79,9 +79,9 @@ const frag = glsl(/* glsl */ `
               0.0);
       } else {
         color1 = hsl2rgb(
-          1.05 + n * 0.15, // First number sets base color. Making last number smaller results in fewer color variation
-          0.7,
-          0.5 + n  * 0.5);
+          1.05 + n * 0.05, // First number sets base color. Making last number smaller results in fewer color variation
+          1.0,
+          0.6 + n  * 0.15);
       }
 
 vec3 color2;
@@ -97,8 +97,6 @@ vec3 color2;
       0.3,
       0.7 + n * 0.3);
       }
-
-      
 
 //gl_FragColor = vec4(vec3(color), 1);
      gl_FragColor = vec4(vec3(color1), alpha) + vec4(vec3(color2), alpha2);
