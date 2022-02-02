@@ -26,11 +26,6 @@ const frag = glsl(/* glsl */ `
 
   void main () { // Every shader has to have main function, here the pixel manipulation is done
   // fragColor is a reserverd word in this shader language
-  // Vec4 syntax: r, g, b, alpha
-  // gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0); // You NEED to put a decimal point if they're floats, otherwise it might error
-  // Gradient example: vec3(vUv.x, vUv.x + 0.2, vUv.x + 0.3)
-  // vec with 1 value fills all 3 params with that value
-  // vec3 color = vec3(sin(time) + 1.0 * vUv.x); // Time is in seconds, sin(time) is between -1 and 1
 
 // CODE FOR CIRCLE
 
@@ -49,57 +44,21 @@ const frag = glsl(/* glsl */ `
 // // If input value is between low and high value, it returns a value between 0 and 1
      
      // ORIGINAL VALUE
-     //float alpha = smoothstep(0.315, 0.300, distanceFromCenter); 
      float alpha = step(distanceFromCenter, 0.3); 
 
-     // This WITH ORIGINAL VALUE for alpha also has an interesting effect
-     //float alpha2 = smoothstep(0.315, 0.300, 0.0 - distanceFromCenter); 
-
-     float alpha2 = step(0.300, distanceFromCenter); 
-
-//   // Mix is a glsl function, you can specify the colors you want to mix between. Its like lerp, with min max and value between 0-1 that gives value in between
-//     vec3 color = mix(colorA, colorB, vUv.x + vUv.y * sin(time));
-//     gl_FragColor = vec4(color, alpha); // Use alpha to create circle
-
 // CODE FOR NOISE
-
-//     // Find center of screen
- //   vec2 center = vUv - 0.5; // subtracts 0.5 from u and v coordinate
- //   center.x *= aspectRatio; // Shrink center by aspect ratio
 
     // coordinate * 2 increases noise frequency (so smaller blobs)
     float n = noise(vec3(center.x * 15.0, center.y * 40.0, time / 2.0)); // noise requires an x y z coordinate
 
     vec3 color1;
 
-      if (alpha == 0.0) {
-        color1 = hsl2rgb(
-              0.0, // First number sets base color. Making last number smaller results in fewer color variation
-              0.0,
-              0.0);
-      } else {
-        color1 = hsl2rgb(
-          1.05 + n * 0.05, // First number sets base color. Making last number smaller results in fewer color variation
-          1.0,
-          0.6 + n  * 0.15);
-      }
+  color1 = hsl2rgb(
+    1.05 + n * 0.05, // First number sets base color. Making last number smaller results in fewer color variation
+    1.0,
+    0.6 + n  * 0.15);
 
-vec3 color2;
-
-      if (alpha2 == 0.0) {
-    color2 = hsl2rgb(
-      0.0, // First number sets base color. Making last number smaller results in fewer color variation
-              0.0,
-              0.0);
-      } else {
-    color2 = hsl2rgb(
-      0.6 + n * 0.15, // First number sets base color. Making last number smaller results in fewer color variation
-      0.3,
-      0.7 + n * 0.3);
-      }
-
-//gl_FragColor = vec4(vec3(color), 1);
-     gl_FragColor = vec4(vec3(color1), alpha) + vec4(vec3(color2), alpha2);
+     gl_FragColor = vec4(vec3(color1), alpha);
   }
 `);
 
