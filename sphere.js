@@ -48,14 +48,14 @@ const frag = glsl(/* glsl */ `
 
 // CODE FOR NOISE
 
-    // coordinate * 2 increases noise frequency (so smaller blobs)
+    // coordinate * n increases noise frequency (so smaller blobs)
     float n = noise(vec3(center.x * 15.0, center.y * 40.0, time / 2.0)); // noise requires an x y z coordinate
 
     vec3 color1;
 
   color1 = hsl2rgb(
     1.05 + n * 0.05, // First number sets base color. Making last number smaller results in fewer color variation
-    1.0,
+    0.9 + n * 0.1,
     0.6 + n  * 0.15);
 
      gl_FragColor = vec4(vec3(color1), alpha);
